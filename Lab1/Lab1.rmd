@@ -1,0 +1,165 @@
+---
+title: "Lab 1"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Uzduotis NR 1
+```{r}
+#1.Realizuokite dvimačio Gauso atsitiktinių dydžių generavimo funkciją, kuri generuotų dydžius su vidurkiu M ir kovariacine matrica R (žr. variantų lentelę). Ši funkcija gali naudotis tik vienamačio standartinio Gauso atsitiktinio dydžio generatoriumi rnorm(n). Tolimesnei užduočiai naudokite šią savo sudarytą funkciją.
+
+set.seed(6)
+
+mu1 <- 9
+mu2 <- 1
+
+M <- c(mu1, mu2)
+
+R <- matrix(
+   c(
+      40, -10,
+      -10, 4
+   ),
+   nrow = 2, ncol = 2
+)
+
+# -- 1 --
+
+DvimatisGausoAD <- function(N, M, R){
+   # Cholesky dekompozicija
+   
+   # Transponuota cholesky dekompozicija
+   Chol = t(chol(R))
+   
+   Z = matrix(
+      rnorm(2 * N),
+      nrow = 2, ncol = N
+   )
+   DvimatisGauso = t(Chol %*% Z) +
+      matrix(
+         rep(M, N),
+         byrow = T, ncol = 2
+      )
+   return(DvimatisGauso)
+}
+
+# -------
+# -- 2 --
+
+N <- c(10, 100, 1000, 10000)
+
+print("Tikra kovariacine matrica:")
+R
+
+for(i in 1:length(N)){
+   print(paste0("Kovariacine matrica, kai N = ", N[i]))
+   print(round(cov(DvimatisGausoAD(N[i], M, R)), 1))
+}
+
+print("Tikri vidurkiai:")
+M
+
+for(i in 1:length(N)){
+   print(paste0("Vidurkiai, kai N = ", N[i]))
+   print(round(colMeans(DvimatisGausoAD(N[i], M, R)), 1))
+}
+
+# -------
+# -- 3 --
+
+# Function to draw ellipse for bivariate normal data
+library(mixtools)
+ellipses <- function(DvimatisGauso, alpha){
+  Xbar <- apply(DvimatisGauso,2,mean)
+  S <- cov(DvimatisGauso)
+  ellipse(Xbar, S, alpha = alpha, col="red")
+}
+
+ro <- R[2,1] / ( sqrt(R[1,1]) * sqrt(R[2,2]) )
+
+eigen(R)$values >= 0
+
+
+
+# Kuomet keiciam N
+N <- c(10, 100, 1000, 10000, 100000, 1000000)
+DvimaciaiGauso <- list(
+   DvimatisGausoAD(N[1], M, R),
+   DvimatisGausoAD(N[2], M, R),
+   DvimatisGausoAD(N[3], M, R),
+   DvimatisGausoAD(N[4], M, R),
+   DvimatisGausoAD(N[5], M, R),
+   DvimatisGausoAD(N[6], M, R)
+)
+
+par(mfrow=c(3,2))
+for(i in 1:6){
+  item <- paste("Imties dydis - ",N[i],sep="")
+  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
+  ellipses(DvimaciaiGauso[[i]],.5)
+  ellipses(DvimaciaiGauso[[i]],.05)
+  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
+  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+}
+par(mfrow=c(1,1))
+
+
+# Kuomet didinam kovariacines matricos 1,1 koordinate
+DvimaciaiGauso <- list()
+matrica <- R
+koordinate <- seq(40, by = 10, length.out = 8)
+for(i in 1:8){
+   matrica[1,1] <- koordinate[i]
+   DvimaciaiGauso[[i]] <- DvimatisGausoAD(1000, M, matrica)
+   print(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ))
+   print(eigen(matrica)$values >= 0)
+   
+}
+par(mfrow=c(4,2))
+for(i in 1:8){
+  item <- paste("N - 1000, 1,1 koordinates reiksme - ",koordinate[i],sep="")
+  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
+  ellipses(DvimaciaiGauso[[i]],.5)
+  ellipses(DvimaciaiGauso[[i]],.05)
+  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
+  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+}
+par(mfrow=c(1,1))
+
+# Kuomet mazinam kovariacines matricos 1,1 koordinate
+DvimaciaiGauso <- list()
+matrica <- R
+koordinate <- seq(35, 27, by = -2)
+for(i in 1:length(koordinate)){
+   matrica[1,1] <- koordinate[i]
+   print(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ))
+   print(eigen(matrica)$values >= 0)
+   DvimaciaiGauso[[i]] <- DvimatisGausoAD(1000, M, matrica)
+   
+}
+par(mfrow=c(3,2))
+for(i in 1:length(koordinate)){
+  item <- paste("N - 1000, 1,1 koordinates reiksme - ",koordinate[i],sep="")
+  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
+  ellipses(DvimaciaiGauso[[i]],.5)
+  ellipses(DvimaciaiGauso[[i]],.05)
+  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
+  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+}
+par(mfrow=c(1,1))
+
+# -------
+
+
+
+
+
+# Literatura
+# https://www.itl.nist.gov/div898/handbook/pmc/section5/pmc542.htm
+# https://blog.revolutionanalytics.com/2016/08/simulating-form-the-bivariate-normal-distribution-in-r-1.html
+# https://www2.stat.duke.edu/courses/Spring12/sta104.1/Lectures/Lec22.pdf
+
+```
