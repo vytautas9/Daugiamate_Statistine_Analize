@@ -78,12 +78,6 @@ ellipses <- function(DvimatisGauso, alpha){
   ellipse(Xbar, S, alpha = alpha, col="red")
 }
 
-ro <- R[2,1] / ( sqrt(R[1,1]) * sqrt(R[2,2]) )
-
-eigen(R)$values >= 0
-
-
-
 # Kuomet keiciam N
 N <- c(10, 100, 1000, 10000, 100000, 1000000)
 DvimaciaiGauso <- list(
@@ -107,49 +101,56 @@ for(i in 1:6){
 par(mfrow=c(1,1))
 
 
-# Kuomet didinam kovariacines matricos 1,1 koordinate
-DvimaciaiGauso <- list()
-matrica <- R
-koordinate <- seq(40, by = 10, length.out = 8)
-for(i in 1:8){
-   matrica[1,1] <- koordinate[i]
-   DvimaciaiGauso[[i]] <- DvimatisGausoAD(1000, M, matrica)
-   print(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ))
-   print(eigen(matrica)$values >= 0)
+KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, N){
+   DvimaciaiGauso <- list()
+   matrica <- R
+   Koreliacijos <- NULL
+   koordinate <- seq(ReiksmeNuo, by = ReiksmesDidinimas, length.out = KiekReiksmiu)
+   for(i in 1:KiekReiksmiu){
+      matrica[PirmaKoord, AntraKoord] <- koordinate[i]
+      DvimaciaiGauso[[i]] <- DvimatisGausoAD(N, M, matrica)
+      print(matrica)
+      print(eigen(matrica)$values >= 0)
+      Koreliacijos <- c(Koreliacijos, round(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ), 3))
+      print(Koreliacijos[i])
    
+   }
+   par(mfrow=c(3,2))
+   for(i in 1:KiekReiksmiu){
+      item <- paste0("N - ", N, " Kov. matricos ", PirmaKoord, ", ", AntraKoord, " koord. reiksme - ", koordinate[i], ", koreliacijos koef - ", Koreliacijos[i])
+      plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
+      ellipses(DvimaciaiGauso[[i]],.5)
+      ellipses(DvimaciaiGauso[[i]],.05)
+      abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
+      abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+   }
+   par(mfrow=c(1,1))
 }
-par(mfrow=c(4,2))
-for(i in 1:8){
-  item <- paste("N - 1000, 1,1 koordinates reiksme - ",koordinate[i],sep="")
-  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
-  ellipses(DvimaciaiGauso[[i]],.5)
-  ellipses(DvimaciaiGauso[[i]],.05)
-  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
-  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
-}
-par(mfrow=c(1,1))
+
+
+# Kuomet didinam kovariacines matricos 1,1 koordinate
+KeiciamParametrus(1, 1, 40, 10, 8, 1000)
 
 # Kuomet mazinam kovariacines matricos 1,1 koordinate
-DvimaciaiGauso <- list()
-matrica <- R
-koordinate <- seq(35, 27, by = -2)
-for(i in 1:length(koordinate)){
-   matrica[1,1] <- koordinate[i]
-   print(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ))
-   print(eigen(matrica)$values >= 0)
-   DvimaciaiGauso[[i]] <- DvimatisGausoAD(1000, M, matrica)
-   
-}
-par(mfrow=c(3,2))
-for(i in 1:length(koordinate)){
-  item <- paste("N - 1000, 1,1 koordinates reiksme - ",koordinate[i],sep="")
-  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
-  ellipses(DvimaciaiGauso[[i]],.5)
-  ellipses(DvimaciaiGauso[[i]],.05)
-  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
-  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
-}
-par(mfrow=c(1,1))
+KeiciamParametrus(1, 1, 40, -2, 8, 1000)
+
+# Kuomet didinam kovariacines matricos 2,2 koordinate
+KeiciamParametrus(2, 2, 40, 10, 8, 1000)
+
+# Kuomet mazinam kovariacines matricos 2,2 koordinate
+KeiciamParametrus(2, 2, 38, -5, 8, 1000)
+
+# Kuomet didinam kovariacines matricos 1,2 koordinate
+KeiciamParametrus(1, 2, -10, 3, 8, 1000)
+
+# Kuomet mazinam kovariacines matricos 1,2 koordinate
+KeiciamParametrus(1, 2, -10, -1, 3, 1000)
+
+# Kuomet didinam kovariacines matricos 2,1 koordinate
+KeiciamParametrus(2, 1, -10, 3, 8, 1000)
+
+# Kuomet mazinam kovariacines matricos 2,1 koordinate
+KeiciamParametrus(2, 1, -10, -1, 3, 1000)
 
 # -------
 
