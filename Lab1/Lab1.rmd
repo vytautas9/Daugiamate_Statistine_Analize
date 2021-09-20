@@ -11,13 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 #1.Realizuokite dvimačio Gauso atsitiktinių dydžių generavimo funkciją, kuri generuotų dydžius su vidurkiu M ir kovariacine matrica R (žr. variantų lentelę). Ši funkcija gali naudotis tik vienamačio standartinio Gauso atsitiktinio dydžio generatoriumi rnorm(n). Tolimesnei užduočiai naudokite šią savo sudarytą funkciją.
 
+# 6 variantas - Vytautas Kraujalis
 set.seed(6)
 
+# Duoti vidurkiai
 mu1 <- 9
 mu2 <- 1
 
 M <- c(mu1, mu2)
 
+# Duota sigma matrica
 R <- matrix(
    c(
       40, -10,
@@ -28,12 +31,14 @@ R <- matrix(
 
 # -- 1 --
 
+# Funkcija, kurios argumentai: N - imties dydis, M - Vidurkiu matrica, R - Kovariacine matrica. Funkcija grazina dvimati normaluji a.d. matricos pavidalus 2*N
 DvimatisGausoAD <- function(N, M, R){
    # Cholesky dekompozicija
    
    # Transponuota cholesky dekompozicija
    Chol = t(chol(R))
    
+   # Generuojam normaliuosius vienmacius a.d.
    Z = matrix(
       rnorm(2 * N),
       nrow = 2, ncol = N
@@ -49,6 +54,7 @@ DvimatisGausoAD <- function(N, M, R){
 # -------
 # -- 2 --
 
+# Imties dydziu vektorius, su kuriais darysime bandymus
 N <- c(10, 100, 1000, 10000)
 
 print("Tikra kovariacine matrica:")
@@ -76,8 +82,10 @@ library(dplyr)
 #Grafiko brezimas
 BreztiSklaidosDiagrama <- function(DvimatisGausas){
    DvimatisGausas <- as.data.frame(DvimatisGausas)
+   # Apskaiciuojam empirinius vidurkius, naudosime tasko padejimui sklaidos diagramoje
    EmpiriniaiVidurkiai <- DvimatisGausas %>% 
       summarise_all(mean)
+   # Breziame a.d. sklaidos diagrame, elipsines kreives 95% ir 50% tiketinoms reiksmems ir empirinio vidurkio vieta
    ggplot(DvimatisGausas, aes(x = V1, y = V2)) +
       geom_point() +
       stat_ellipse(level = 0.5, color = "red", type = "norm", size = 1) +
@@ -86,7 +94,7 @@ BreztiSklaidosDiagrama <- function(DvimatisGausas){
       theme_minimal()
 }
 
-# Kuomet keiciam N
+# Kuomet keiciam imties dydi N
 N <- c(10, 100, 1000, 2500, 5000, 10000)
 DvimaciaiGauso <- list(
    DvimatisGausoAD(N[1], M, R),
@@ -109,19 +117,26 @@ cowplot::plot_grid(
    BreztiSklaidosDiagrama(DvimatisGausoAD(N[5], M, R)),
    BreztiSklaidosDiagrama(DvimatisGausoAD(N[6], M, R)),
    labels = Labels)
+ggsave(paste0("Lab1_Grafikas_PagalN.png"), device = "png", width = 14, height = 7)
 
-# Funkcija keisti parametrus ir brezti grafika
+# Funkcija keisti parametrus ir brezti sklaidos diagrama
+# PirmaKoord ir AntraKoord - koordinates, kuriu parametrus keisime; ReiksmeNuo - Koordinates reikmes, kuri bus pradiniu momentu; ReiksmesDidinimas - keliais vienetais didinsime koordinates reiksme; KiekReiksmiu - kiek susigeneruosime reiksmiu (grafikas nubres max 6); N - Imties dydis N
 KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, N){
    DvimaciaiGauso <- list()
-   matrica <- R
+   # Kovariacine matrica, kuri kiekvienos iteracijos metu igys nauja parametro reiksme
+   KovariacineMatrica <- R
+   # Isisaugosime koreliacijos koeficientus
    Koreliacijos <- NULL
+   # Koordinates parametru reiksmes, kurias testuosime
    koordinate <- seq(ReiksmeNuo, by = ReiksmesDidinimas, length.out = KiekReiksmiu)
    for(i in 1:KiekReiksmiu){
-      matrica[PirmaKoord, AntraKoord] <- koordinate[i]
-      DvimaciaiGauso[[i]] <- DvimatisGausoAD(N, M, matrica)
-      print(matrica)
-      print(eigen(matrica)$values >= 0)
-      Koreliacijos <- c(Koreliacijos, round(matrica[2,1] / ( sqrt(matrica[1,1]) * sqrt(matrica[2,2]) ), 3))
+      KovariacineMatrica[PirmaKoord, AntraKoord] <- koordinate[i]
+      DvimaciaiGauso[[i]] <- DvimatisGausoAD(N, M, KovariacineMatrica)
+      print(KovariacineMatrica)
+      # Patikriname, ar tikrines reiksmes yra >= 0
+      print(eigen(KovariacineMatrica)$values >= 0)
+      # Apskaiciuojame ir issisaugome koreliacijos koeficienta
+      Koreliacijos <- c(Koreliacijos, round(cov(DvimaciaiGauso[[i]][,1], DvimaciaiGauso[[i]][,2]) / ( sqrt(KovariacineMatrica[1,1]) * sqrt(KovariacineMatrica[2,2]) ), 3))
       print(Koreliacijos[i])
    
    }
@@ -137,11 +152,10 @@ KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidini
       BreztiSklaidosDiagrama(DvimaciaiGauso[[5]]),
       BreztiSklaidosDiagrama(DvimaciaiGauso[[6]]),
       labels = Labels,
-      label_size = 10,
-      label_x = -0.2)
+      label_size = 12,
+      label_x = -0.3)
+   ggsave(paste0("Lab1_Grafikas_",paste(PirmaKoord,AntraKoord,ReiksmeNuo,ReiksmesDidinimas,KiekReiksmiu, sep = "_"), ".png"), device = "png", width = 14, height = 7)
 }
-
-
 
 # Kuomet didinam kovariacines matricos 1,1 koordinate
 KeiciamParametrus(1, 1, 40, 10, 6, 1000)
@@ -153,7 +167,7 @@ KeiciamParametrus(1, 1, 40, -2, 6, 1000)
 KeiciamParametrus(2, 2, 10, 50, 6, 1000)
 
 # Kuomet mazinam kovariacines matricos 2,2 koordinate
-KeiciamParametrus(2, 2, 40, -6, 6, 1000)
+KeiciamParametrus(2, 2, 14, -2, 6, 1000)
 
 # Kuomet didinam kovariacines matricos 1,2 koordinate
 KeiciamParametrus(1, 2, -10, 4, 6, 1000)
@@ -168,10 +182,6 @@ KeiciamParametrus(2, 1, -10, 4, 6, 1000)
 KeiciamParametrus(2, 1, -7, -1, 6, 1000)
 
 # -------
-
-
-
-
 
 # Literatura
 # https://www.itl.nist.gov/div898/handbook/pmc/section5/pmc542.htm
