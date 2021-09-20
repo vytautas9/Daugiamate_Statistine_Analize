@@ -70,16 +70,24 @@ for(i in 1:length(N)){
 # -------
 # -- 3 --
 
-# Function to draw ellipse for bivariate normal data
-library(mixtools)
-ellipses <- function(DvimatisGauso, alpha){
-  Xbar <- apply(DvimatisGauso,2,mean)
-  S <- cov(DvimatisGauso)
-  ellipse(Xbar, S, alpha = alpha, col="red")
+library(ggplot2)
+library(dplyr)
+
+#Grafiko brezimas
+BreztiSklaidosDiagrama <- function(DvimatisGausas){
+   DvimatisGausas <- as.data.frame(DvimatisGausas)
+   EmpiriniaiVidurkiai <- DvimatisGausas %>% 
+      summarise_all(mean)
+   ggplot(DvimatisGausas, aes(x = V1, y = V2)) +
+      geom_point() +
+      stat_ellipse(level = 0.5, color = "red", type = "norm", size = 1) +
+      stat_ellipse(level = 0.95, color = "green", type = "norm", size = 1) +
+      geom_point(data = EmpiriniaiVidurkiai, size = 4, color = "red", shape = 23, fill = "red") +
+      theme_minimal()
 }
 
 # Kuomet keiciam N
-N <- c(10, 100, 1000, 10000, 100000, 1000000)
+N <- c(10, 100, 1000, 2500, 5000, 10000)
 DvimaciaiGauso <- list(
    DvimatisGausoAD(N[1], M, R),
    DvimatisGausoAD(N[2], M, R),
@@ -88,19 +96,21 @@ DvimaciaiGauso <- list(
    DvimatisGausoAD(N[5], M, R),
    DvimatisGausoAD(N[6], M, R)
 )
-
-par(mfrow=c(3,2))
-for(i in 1:6){
-  item <- paste("Imties dydis - ",N[i],sep="")
-  plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
-  ellipses(DvimaciaiGauso[[i]],.5)
-  ellipses(DvimaciaiGauso[[i]],.05)
-  abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
-  abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+Labels <- list()
+for(i in 1:length(N)){
+   Labels[[i]] <- paste0("N = ", N[i])
 }
-par(mfrow=c(1,1))
 
+cowplot::plot_grid(
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[1], M, R)), 
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[2], M, R)), 
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[3], M, R)),
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[4], M, R)),
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[5], M, R)),
+   BreztiSklaidosDiagrama(DvimatisGausoAD(N[6], M, R)),
+   labels = Labels)
 
+# Funkcija keisti parametrus ir brezti grafika
 KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, N){
    DvimaciaiGauso <- list()
    matrica <- R
@@ -115,42 +125,47 @@ KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidini
       print(Koreliacijos[i])
    
    }
-   par(mfrow=c(3,2))
+   Labels <- list()
    for(i in 1:KiekReiksmiu){
-      item <- paste0("N - ", N, " Kov. matricos ", PirmaKoord, ", ", AntraKoord, " koord. reiksme - ", koordinate[i], ", koreliacijos koef - ", Koreliacijos[i])
-      plot(DvimaciaiGauso[[i]],xlab="X1",ylab="X2",main=item, col=i)
-      ellipses(DvimaciaiGauso[[i]],.5)
-      ellipses(DvimaciaiGauso[[i]],.05)
-      abline(v = apply(DvimaciaiGauso[[i]],2,mean)[1], col="red")
-      abline(h = apply(DvimaciaiGauso[[i]],2,mean)[2], col="red")
+      Labels[[i]] <- paste0("N = ", N, " Koord. ", PirmaKoord, ", ", AntraKoord, " reiksme = ", koordinate[i], ", kor. koef = ", Koreliacijos[i])
    }
-   par(mfrow=c(1,1))
+   cowplot::plot_grid(
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[1]]), 
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[2]]), 
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[3]]),
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[4]]),
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[5]]),
+      BreztiSklaidosDiagrama(DvimaciaiGauso[[6]]),
+      labels = Labels,
+      label_size = 10,
+      label_x = -0.2)
 }
 
 
+
 # Kuomet didinam kovariacines matricos 1,1 koordinate
-KeiciamParametrus(1, 1, 40, 10, 8, 1000)
+KeiciamParametrus(1, 1, 40, 10, 6, 1000)
 
 # Kuomet mazinam kovariacines matricos 1,1 koordinate
-KeiciamParametrus(1, 1, 40, -2, 8, 1000)
+KeiciamParametrus(1, 1, 40, -2, 6, 1000)
 
 # Kuomet didinam kovariacines matricos 2,2 koordinate
-KeiciamParametrus(2, 2, 40, 10, 8, 1000)
+KeiciamParametrus(2, 2, 10, 50, 6, 1000)
 
 # Kuomet mazinam kovariacines matricos 2,2 koordinate
-KeiciamParametrus(2, 2, 38, -5, 8, 1000)
+KeiciamParametrus(2, 2, 40, -6, 6, 1000)
 
 # Kuomet didinam kovariacines matricos 1,2 koordinate
-KeiciamParametrus(1, 2, -10, 3, 8, 1000)
+KeiciamParametrus(1, 2, -10, 4, 6, 1000)
 
 # Kuomet mazinam kovariacines matricos 1,2 koordinate
-KeiciamParametrus(1, 2, -10, -1, 3, 1000)
+KeiciamParametrus(1, 2, -7, -1, 6, 1000)
 
 # Kuomet didinam kovariacines matricos 2,1 koordinate
-KeiciamParametrus(2, 1, -10, 3, 8, 1000)
+KeiciamParametrus(2, 1, -10, 4, 6, 1000)
 
 # Kuomet mazinam kovariacines matricos 2,1 koordinate
-KeiciamParametrus(2, 1, -10, -1, 3, 1000)
+KeiciamParametrus(2, 1, -7, -1, 6, 1000)
 
 # -------
 
