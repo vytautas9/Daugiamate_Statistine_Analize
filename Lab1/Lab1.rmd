@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Uzduotis NR 1
 ```{r}
-#1.Realizuokite dvimačio Gauso atsitiktinių dydžių generavimo funkciją, kuri generuotų dydžius su vidurkiu M ir kovariacine matrica R (žr. variantų lentelę). Ši funkcija gali naudotis tik vienamačio standartinio Gauso atsitiktinio dydžio generatoriumi rnorm(n). Tolimesnei užduočiai naudokite šią savo sudarytą funkciją.
+# 1.Realizuokite dvimačio Gauso atsitiktinių dydžių generavimo funkciją, kuri generuotų dydžius su vidurkiu M ir kovariacine matrica R (žr. variantų lentelę). Ši funkcija gali naudotis tik vienamačio standartinio Gauso atsitiktinio dydžio generatoriumi rnorm(n). Tolimesnei užduočiai naudokite šią savo sudarytą funkciją.
 
 # 6 variantas - Vytautas Kraujalis
 set.seed(6)
@@ -22,33 +22,33 @@ M <- c(mu1, mu2)
 
 # Duota sigma matrica
 R <- matrix(
-   c(
-      40, -10,
-      -10, 4
-   ),
-   nrow = 2, ncol = 2
+  c(
+    40, -10,
+    -10, 4
+  ),
+  nrow = 2, ncol = 2
 )
 
 # -- 1 --
 
 # Funkcija, kurios argumentai: N - imties dydis, M - Vidurkiu matrica, R - Kovariacine matrica. Funkcija grazina dvimati normaluji a.d. matricos pavidalus 2*N
-DvimatisGausoAD <- function(N, M, R){
-   # Cholesky dekompozicija
-   
-   # Transponuota cholesky dekompozicija
-   Chol = t(chol(R))
-   
-   # Generuojam normaliuosius vienmacius a.d.
-   Z = matrix(
-      rnorm(2 * N),
-      nrow = 2, ncol = N
-   )
-   DvimatisGauso = t(Chol %*% Z) +
-      matrix(
-         rep(M, N),
-         byrow = T, ncol = 2
-      )
-   return(DvimatisGauso)
+DvimatisGausoAD <- function(N, M, R) {
+  # Cholesky dekompozicija
+
+  # Transponuota cholesky dekompozicija
+  Chol <- t(chol(R))
+
+  # Generuojam normaliuosius vienmacius a.d.
+  Z <- matrix(
+    rnorm(2 * N),
+    nrow = 2, ncol = N
+  )
+  DvimatisGauso <- t(Chol %*% Z) +
+    matrix(
+      rep(M, N),
+      byrow = T, ncol = 2
+    )
+  return(DvimatisGauso)
 }
 
 # -------
@@ -60,17 +60,17 @@ N <- c(10, 100, 1000, 10000)
 print("Tikra kovariacine matrica:")
 R
 
-for(i in 1:length(N)){
-   print(paste0("Kovariacine matrica, kai N = ", N[i]))
-   print(round(cov(DvimatisGausoAD(N[i], M, R)), 1))
+for (i in 1:length(N)) {
+  print(paste0("Kovariacine matrica, kai N = ", N[i]))
+  print(round(cov(DvimatisGausoAD(N[i], M, R)), 1))
 }
 
 print("Tikri vidurkiai:")
 M
 
-for(i in 1:length(N)){
-   print(paste0("Vidurkiai, kai N = ", N[i]))
-   print(round(colMeans(DvimatisGausoAD(N[i], M, R)), 1))
+for (i in 1:length(N)) {
+  print(paste0("Vidurkiai, kai N = ", N[i]))
+  print(round(colMeans(DvimatisGausoAD(N[i], M, R)), 1))
 }
 
 # -------
@@ -79,82 +79,83 @@ for(i in 1:length(N)){
 library(ggplot2)
 library(dplyr)
 
-#Grafiko brezimas
-BreztiSklaidosDiagrama <- function(DvimatisGausas){
-   DvimatisGausas <- as.data.frame(DvimatisGausas)
-   # Apskaiciuojam empirinius vidurkius, naudosime tasko padejimui sklaidos diagramoje
-   EmpiriniaiVidurkiai <- DvimatisGausas %>% 
-      summarise_all(mean)
-   # Breziame a.d. sklaidos diagrame, elipsines kreives 95% ir 50% tiketinoms reiksmems ir empirinio vidurkio vieta
-   ggplot(DvimatisGausas, aes(x = V1, y = V2)) +
-      geom_point() +
-      stat_ellipse(level = 0.5, color = "red", type = "norm", size = 1) +
-      stat_ellipse(level = 0.95, color = "green", type = "norm", size = 1) +
-      geom_point(data = EmpiriniaiVidurkiai, size = 4, color = "red", shape = 23, fill = "red") +
-      theme_minimal()
+# Grafiko brezimas
+BreztiSklaidosDiagrama <- function(DvimatisGausas) {
+  DvimatisGausas <- as.data.frame(DvimatisGausas)
+  # Apskaiciuojam empirinius vidurkius, naudosime tasko padejimui sklaidos diagramoje
+  EmpiriniaiVidurkiai <- DvimatisGausas %>%
+    summarise_all(mean)
+  # Breziame a.d. sklaidos diagrame, elipsines kreives 95% ir 50% tiketinoms reiksmems ir empirinio vidurkio vieta
+  ggplot(DvimatisGausas, aes(x = V1, y = V2)) +
+    geom_point() +
+    stat_ellipse(level = 0.5, color = "red", type = "norm", size = 1) +
+    stat_ellipse(level = 0.95, color = "green", type = "norm", size = 1) +
+    geom_point(data = EmpiriniaiVidurkiai, size = 4, color = "red", shape = 23, fill = "red") +
+    theme_minimal()
 }
 
 # Kuomet keiciam imties dydi N
 N <- c(10, 100, 1000, 2500, 5000, 10000)
 DvimaciaiGauso <- list(
-   DvimatisGausoAD(N[1], M, R),
-   DvimatisGausoAD(N[2], M, R),
-   DvimatisGausoAD(N[3], M, R),
-   DvimatisGausoAD(N[4], M, R),
-   DvimatisGausoAD(N[5], M, R),
-   DvimatisGausoAD(N[6], M, R)
+  DvimatisGausoAD(N[1], M, R),
+  DvimatisGausoAD(N[2], M, R),
+  DvimatisGausoAD(N[3], M, R),
+  DvimatisGausoAD(N[4], M, R),
+  DvimatisGausoAD(N[5], M, R),
+  DvimatisGausoAD(N[6], M, R)
 )
 Labels <- list()
-for(i in 1:length(N)){
-   Labels[[i]] <- paste0("N = ", N[i])
+for (i in 1:length(N)) {
+  Labels[[i]] <- paste0("N = ", N[i])
 }
 
 cowplot::plot_grid(
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[1], M, R)), 
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[2], M, R)), 
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[3], M, R)),
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[4], M, R)),
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[5], M, R)),
-   BreztiSklaidosDiagrama(DvimatisGausoAD(N[6], M, R)),
-   labels = Labels)
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[1], M, R)),
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[2], M, R)),
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[3], M, R)),
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[4], M, R)),
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[5], M, R)),
+  BreztiSklaidosDiagrama(DvimatisGausoAD(N[6], M, R)),
+  labels = Labels
+)
 ggsave(paste0("Lab1_Grafikas_PagalN.png"), device = "png", width = 14, height = 7)
 
 # Funkcija keisti parametrus ir brezti sklaidos diagrama
 # PirmaKoord ir AntraKoord - koordinates, kuriu parametrus keisime; ReiksmeNuo - Koordinates reikmes, kuri bus pradiniu momentu; ReiksmesDidinimas - keliais vienetais didinsime koordinates reiksme; KiekReiksmiu - kiek susigeneruosime reiksmiu (grafikas nubres max 6); N - Imties dydis N
-KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, N){
-   DvimaciaiGauso <- list()
-   # Kovariacine matrica, kuri kiekvienos iteracijos metu igys nauja parametro reiksme
-   KovariacineMatrica <- R
-   # Isisaugosime koreliacijos koeficientus
-   Koreliacijos <- NULL
-   # Koordinates parametru reiksmes, kurias testuosime
-   koordinate <- seq(ReiksmeNuo, by = ReiksmesDidinimas, length.out = KiekReiksmiu)
-   for(i in 1:KiekReiksmiu){
-      KovariacineMatrica[PirmaKoord, AntraKoord] <- koordinate[i]
-      DvimaciaiGauso[[i]] <- DvimatisGausoAD(N, M, KovariacineMatrica)
-      print(KovariacineMatrica)
-      # Patikriname, ar tikrines reiksmes yra >= 0
-      print(eigen(KovariacineMatrica)$values >= 0)
-      # Apskaiciuojame ir issisaugome koreliacijos koeficienta
-      Koreliacijos <- c(Koreliacijos, round(cov(DvimaciaiGauso[[i]][,1], DvimaciaiGauso[[i]][,2]) / ( sqrt(KovariacineMatrica[1,1]) * sqrt(KovariacineMatrica[2,2]) ), 3))
-      print(Koreliacijos[i])
-   
-   }
-   Labels <- list()
-   for(i in 1:KiekReiksmiu){
-      Labels[[i]] <- paste0("N = ", N, " Koord. ", PirmaKoord, ", ", AntraKoord, " reiksme = ", koordinate[i], ", kor. koef = ", Koreliacijos[i])
-   }
-   cowplot::plot_grid(
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[1]]), 
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[2]]), 
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[3]]),
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[4]]),
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[5]]),
-      BreztiSklaidosDiagrama(DvimaciaiGauso[[6]]),
-      labels = Labels,
-      label_size = 12,
-      label_x = -0.3)
-   ggsave(paste0("Lab1_Grafikas_",paste(PirmaKoord,AntraKoord,ReiksmeNuo,ReiksmesDidinimas,KiekReiksmiu, sep = "_"), ".png"), device = "png", width = 14, height = 7)
+KeiciamParametrus <- function(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, N) {
+  DvimaciaiGauso <- list()
+  # Kovariacine matrica, kuri kiekvienos iteracijos metu igys nauja parametro reiksme
+  KovariacineMatrica <- R
+  # Isisaugosime koreliacijos koeficientus
+  Koreliacijos <- NULL
+  # Koordinates parametru reiksmes, kurias testuosime
+  koordinate <- seq(ReiksmeNuo, by = ReiksmesDidinimas, length.out = KiekReiksmiu)
+  for (i in 1:KiekReiksmiu) {
+    KovariacineMatrica[PirmaKoord, AntraKoord] <- koordinate[i]
+    DvimaciaiGauso[[i]] <- DvimatisGausoAD(N, M, KovariacineMatrica)
+    print(KovariacineMatrica)
+    # Patikriname, ar tikrines reiksmes yra >= 0
+    print(eigen(KovariacineMatrica)$values >= 0)
+    # Apskaiciuojame ir issisaugome koreliacijos koeficienta
+    Koreliacijos <- c(Koreliacijos, round(cov(DvimaciaiGauso[[i]][, 1], DvimaciaiGauso[[i]][, 2]) / (sqrt(KovariacineMatrica[1, 1]) * sqrt(KovariacineMatrica[2, 2])), 3))
+    print(Koreliacijos[i])
+  }
+  Labels <- list()
+  for (i in 1:KiekReiksmiu) {
+    Labels[[i]] <- paste0("N = ", N, " Koord. ", PirmaKoord, ", ", AntraKoord, " reiksme = ", koordinate[i], ", kor. koef = ", Koreliacijos[i])
+  }
+  cowplot::plot_grid(
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[1]]),
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[2]]),
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[3]]),
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[4]]),
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[5]]),
+    BreztiSklaidosDiagrama(DvimaciaiGauso[[6]]),
+    labels = Labels,
+    label_size = 12,
+    label_x = -0.3
+  )
+  ggsave(paste0("Lab1_Grafikas_", paste(PirmaKoord, AntraKoord, ReiksmeNuo, ReiksmesDidinimas, KiekReiksmiu, sep = "_"), ".png"), device = "png", width = 14, height = 7)
 }
 
 # Kuomet didinam kovariacines matricos 1,1 koordinate
@@ -187,5 +188,161 @@ KeiciamParametrus(2, 1, -7, -1, 6, 1000)
 # https://www.itl.nist.gov/div898/handbook/pmc/section5/pmc542.htm
 # https://blog.revolutionanalytics.com/2016/08/simulating-form-the-bivariate-normal-distribution-in-r-1.html
 # https://www2.stat.duke.edu/courses/Spring12/sta104.1/Lectures/Lec22.pdf
+```
 
+# Uzduotis NR 2
+```{r}
+
+
+# -- 1 --
+q <- 2
+p1 <- 0.5
+mu1 <- 0
+o1 <- 1
+p2 <- 1 - p1
+mu2 <- -8
+o2 <- 16
+
+N <- 300
+U <- runif(N)
+x <- rep(NA, N)
+
+# Susikuriame gauso a.d. mišinį
+for (i in 1:N) {
+  if (U[i] < p1) {
+    x[i] <- rnorm(1, mu1, o1)
+  } else {
+    x[i] <- rnorm(1, mu2, o2)
+  }
+}
+
+# Teorinio tankio funkcijai susigeneruojam x reikšmes
+x_teorinis <- seq(-60, 40, length.out = 300)
+# Teorinis tankis
+tankis_teorinis <- p1 * dnorm(x_teorinis, mu1, o1) + (1 - p1) * dnorm(x_teorinis, mu1, o1)
+
+df <- data.frame(x = x, tankis_teorinis = tankis_teorinis, x_teorinis = x_teorinis)
+
+ggplot(df) +
+  geom_histogram(aes(x = x, y = ..density..)) +
+  geom_line(aes(x = x_teorinis, y = tankis_teorinis), color = "red", size = 1.4) +
+  stat_density(aes(x = x), geom = "line", kernel = "gaussian", n = 300, adjust = 0.5, color = "darkgreen", size = 1) +
+  stat_density(aes(x = x), geom = "line", kernel = "gaussian", n = 300, adjust = 1, color = "coral", size = 1) +
+  stat_density(aes(x = x), geom = "line", kernel = "gaussian", n = 300, adjust = 1.5, color = "brown", size = 1) +
+  stat_density(aes(x = x), geom = "line", kernel = "gaussian", n = 300, adjust = 2, color = "blue", size = 1) +
+  stat_density(aes(x = x), geom = "line", kernel = "gaussian", n = 300, adjust = 2, color = "purple", size = 1) +
+  theme_minimal()
+ggsave("Lab1_Grafikas_AD_Branduoliai_.png", device = "png", width = 14, height = 7)
+
+# Numatyta bw reikšmė:
+bw.nrd0(x)
+
+
+
+# -------
+# -- 2 --
+q <- 2
+p1 <- 0.2
+M1 <- c(0, 0)
+R1 <- matrix(
+  c(
+    1, 0,
+    0, 1
+  ),
+  ncol = 2, nrow = 2
+)
+M2 <- c(-15, 15)
+R2 <- matrix(
+  c(
+    10, -10,
+    -10, 30
+  ),
+  ncol = 2, nrow = 2
+)
+
+# Mišinio vidurkiai
+M <- matrix(c(M1, M2), ncol = 2, byrow = T)
+
+# Mišinio kov. matricos
+R <- array(rep(NA, 2 * 2 * 2), c(2, 2, 2))
+R[, , 1] <- R1
+R[, , 2] <- R2
+
+library(MASS)
+N <- 500
+
+# Dvimačio Gauso A.D. mišinio generavimo funkcija, N - imties dydis; M_2d - Mišinio vidurkiai; R_2d - Mišinio kov. matricos
+DvimatisGausoAD_Misinys <- function(N, M_2d, R_2d) {
+  matrica <- matrix(rep(NA, N * 2), ncol = 2)
+  colnames(matrica) <- paste0("X", 1:2)
+  U <- runif(N)
+  for (i in 1:N) {
+    if (U[i] < p1) {
+      matrica[i, ] <- DvimatisGausoAD(1, M = M_2d[1, ], R = R_2d[, , 1])
+    } else {
+      matrica[i, ] <- DvimatisGausoAD(1, M = M_2d[2, ], R = R_2d[, , 2])
+    }
+  }
+  return(matrica)
+}
+
+dvimatis_gauso_ad_misinys <- DvimatisGausoAD_Misinys(N, M, R)
+
+png("dvimatis_gauso_ad_misinys_sklaidosdiagrama.png", width = 14, height = 7, units = "in", res = 1200)
+plot(dvimatis_gauso_ad_misinys)
+dev.off()
+
+BreztiDvimacioGausoAD_Misinio_Tanki <- function(H) {
+  kde <- ks::kde(x = dvimatis_gauso_ad_misinys, H = H)
+  png(paste0("heatmap_dvimatisAD_", H[1, 1], "_", H[1, 2], "_", H[2, 1], "_", H[2, 2], ".png"), width = 14, height = 7, units = "in", res = 1200)
+  image(kde$eval.points[[1]], kde$eval.points[[2]], kde$estimate,
+    col = viridis::viridis(20), xlab = "X1", ylab = "X2"
+  )
+  points(kde$x)
+  dev.off()
+
+  png(paste0("3d_dvimatisAD_", H[1, 1], "_", H[1, 2], "_", H[2, 1], "_", H[2, 2], ".png"), width = 14, height = 7, units = "in", res = 1200)
+  plot(kde, display = "persp", col.fun = viridis::viridis, xlab = "X1", ylab = "X2")
+  dev.off()
+}
+
+# Keičiam [1, 1] reikšmę
+H1 <- matrix(c(2, -1.4, -1.4, 1), ncol = 2, nrow = 2)
+H2 <- matrix(c(5, -1.4, -1.4, 1), ncol = 2, nrow = 2)
+H3 <- matrix(c(10, -1.4, -1.4, 1), ncol = 2, nrow = 2)
+
+BreztiDvimacioGausoAD_Misinio_Tanki(H1)
+BreztiDvimacioGausoAD_Misinio_Tanki(H2)
+BreztiDvimacioGausoAD_Misinio_Tanki(H3)
+
+# Keičiam [2, 2] reikšmę
+H5 <- matrix(c(1.7, -1.4, -1.4, 1.5), ncol = 2, nrow = 2)
+H6 <- matrix(c(1.7, -1.4, -1.4, 5), ncol = 2, nrow = 2)
+H7 <- matrix(c(1.7, -1.4, -1.4, 10), ncol = 2, nrow = 2)
+
+BreztiDvimacioGausoAD_Misinio_Tanki(H5)
+BreztiDvimacioGausoAD_Misinio_Tanki(H6)
+BreztiDvimacioGausoAD_Misinio_Tanki(H7)
+
+# Keičiam [1, 2] ir [2, 1] reikšmę
+H8 <- matrix(c(1.7, -1.4, -1.4, 2.4), ncol = 2, nrow = 2)
+H9 <- matrix(c(1.7, 0, 0, 2.4), ncol = 2, nrow = 2)
+H10 <- matrix(c(1.7, 2, 2, 2.4), ncol = 2, nrow = 2)
+
+BreztiDvimacioGausoAD_Misinio_Tanki(H8)
+BreztiDvimacioGausoAD_Misinio_Tanki(H9)
+BreztiDvimacioGausoAD_Misinio_Tanki(H10)
+
+
+
+
+
+# -------
+
+# Literatura
+# https://stats.stackexchange.com/questions/70855/generating-random-variables-from-a-mixture-of-normal-distributions
+# http://www.di.fc.ul.pt/~jpn/r/EM/GaussianMix.html
+# https://bookdown.org/egarpor/NP-UC3M/kde-ii-mult.html
+# https://mfasiolo.github.io/sc2-2019/rcpp_advanced_i/3_kde_armadillo/
+# https://search.r-project.org/R/refmans/stats/html/bandwidth.html
 ```
