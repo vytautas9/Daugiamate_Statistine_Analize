@@ -210,16 +210,16 @@ x <- rep(NA, N)
 # Susikuriame gauso a.d. mišinį
 for (i in 1:N) {
   if (U[i] < p1) {
-    x[i] <- rnorm(1, mu1, o1)
+    x[i] <- rnorm(1, mu1, sqrt(o1))
   } else {
-    x[i] <- rnorm(1, mu2, o2)
+    x[i] <- rnorm(1, mu2, sqrt(o2))
   }
 }
 
 # Teorinio tankio funkcijai susigeneruojam x reikšmes
-x_teorinis <- seq(-60, 40, length.out = 300)
+x_teorinis <- seq(-20, 4, length.out = 300)
 # Teorinis tankis
-tankis_teorinis <- p1 * dnorm(x_teorinis, mu1, o1) + (1 - p1) * dnorm(x_teorinis, mu1, o1)
+tankis_teorinis <- p1 * dnorm(x_teorinis, mu1, sqrt(o1)) + (1 - p1) * dnorm(x_teorinis, mu2, sqrt(o2))
 
 df <- data.frame(x = x, tankis_teorinis = tankis_teorinis, x_teorinis = x_teorinis)
 
