@@ -1,0 +1,101 @@
+---
+title: "Daugiamatė Statistinė Analizė Lab 2, 6 variantas"
+author: "Vytautas Kraujalis"
+date: '2021-11-30'
+output: 
+  word_document:
+    toc: true 
+    toc_depth: 3
+    number_sections: true
+    highlight: tango
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Required packages
+```{r}
+library(dplyr)
+library(factoextra)
+```
+
+# Uzd. 1
+```{r}
+set.seed(123)
+
+data <- read.table("mnist.txt", sep = ",", header = T) %>% 
+   filter(label %in% c(1, 3, 5, 7)) # 6 var.: 1357
+```
+
+# Uzd. 2
+```{r}
+spausdinti_grafika <- function(skaicius, kuri_irasa){
+   image(t(matrix(data %>% filter(label == skaicius) %>% slice(kuri_irasa) %>% select(-label) %>% t() %>% as.vector(), 28, byrow = T))[1:28, 28:1])
+}
+
+# vienetai:
+par(mfrow=c(2,2))
+spausdinti_grafika(1, 1)
+spausdinti_grafika(1, 2)
+spausdinti_grafika(1, 3)
+spausdinti_grafika(1, 4)
+
+# trejetai:
+par(mfrow=c(2,2))
+spausdinti_grafika(3, 1)
+spausdinti_grafika(3, 2)
+spausdinti_grafika(3, 3)
+spausdinti_grafika(3, 4)
+
+# penketai:
+par(mfrow=c(2,2))
+spausdinti_grafika(5, 1)
+spausdinti_grafika(5, 2)
+spausdinti_grafika(5, 3)
+spausdinti_grafika(5, 4)
+
+# septynetai:
+par(mfrow=c(2,2))
+spausdinti_grafika(7, 1)
+spausdinti_grafika(7, 2)
+spausdinti_grafika(7, 3)
+spausdinti_grafika(7, 4)
+```
+
+# Uzd. 3
+```{r}
+pca <- prcomp(data %>% select(-label), scale = FALSE)
+fviz_eig(pca, ncp = 20, main = "Pagrindinių komponenčių (PC1 - PC20) dispersijos (%)", ylab = "Dispersija (%)", xlab = "Pagrindinė Komponentė")
+```
+
+# Uzd. 4
+```{r}
+pca_var <- pca$sdev^2
+pca_var <- pca_var / sum(pca_var)
+
+print(paste0("Pirmos 4 pagrindinės komponentės sumiškai savyje turi ", round(sum(pca_var[1:4]) * 100, digits = 2), "% dispersijos."))
+
+dispersija <- 0
+kiek_pca <- 0
+while(dispersija < 0.9){
+   kiek_pca <- kiek_pca + 1
+   dispersija <- sum(pca_var[1:kiek_pca])
+}
+
+print(paste0("Tam, kad pasiektume 90% suminės dispersijos, mums reikia panaudoti pirmas ", kiek_pca, " pagrindines komponentes, su šiomis komponentinėmis, suminė dispersija sieka ", round(dispersija * 100, digits = 2), "%"))
+```
+
+# Uzd. 5
+```{r}
+skaitmenys <- as.factor(data$label)
+fviz_pca_ind(pca,
+             col.ind = skaitmenys, # color by groups
+             legend.title = "Skaitmuo",
+             label = "none",
+             title = "PC1 ir PC2 sklaidos diagrama pagal skaitmenis"
+             )
+```
+
