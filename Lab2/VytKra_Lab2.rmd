@@ -99,3 +99,22 @@ fviz_pca_ind(pca,
              )
 ```
 
+# Uzd. 6
+```{r}
+
+data %>% 
+   ggplot(aes(x = pixel240, y = pixel239, color = as.factor(label))) +
+   geom_point()
+
+temp <- data %>% select(pixel0, pixel1, label)
+
+temp <- sapply(data, function(x){sum(x > 0)})
+
+temp1 <- sort(temp, decreasing = T)
+   
+```
+
+
+
+
+
