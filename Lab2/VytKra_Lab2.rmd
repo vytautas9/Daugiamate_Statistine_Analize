@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(dplyr)
 library(factoextra)
 library(caret)
+library(glmnet)
 ```
 
 # Uzd. 1
@@ -196,5 +197,178 @@ tikslumai_data <- do.call(rbind.data.frame, tikslumai) %>%
 colnames(tikslumai_data) <- c("skaitmuo_1", "skaitmuo_3", "bendras", "kiek_pca")
 
 
+tikslumai_data %>% 
+   tidyr::pivot_longer(c(-kiek_pca), names_to = "Kieno Tikslumas", values_to = "Tikslumas") %>% 
+   ggplot(aes(x = kiek_pca, y = Tikslumas, color = `Kieno Tikslumas`)) +
+   geom_line() +
+   theme_minimal() +
+   xlab("Pagrindinių Komponenčių Kiekis") +
+   ylab("Tikslumas (%)")
+
+
+glm <- glm(label ~ ., data = data_pcs[,c(1:20, 785)], family = "binomial")
+glm_tuscias <- glm(label ~ 1, data = data_pcs, family = "binomial")
+# Forward
+forward_glm <- step(glm_tuscias, direction = "forward", scope = formula(glm), trace=0)
+summary(forward_glm)
+
+forward_glm$anova
+
+formules_forward <- NULL
+formules_forward[[1]] <- "label ~ PC1"
+for(i in 3:nrow(forward_glm$anova)){
+   formules_forward[[i-1]] <- paste0(formules_forward[[i-2]], forward_glm$anova[i,1])
+}
+
+formules_forward <- lapply(formules_forward, as.formula)
+
+
+tikslumai_forward <- NULL
+for(i in 1:length(formules_forward)){
+   glm <- glm(formula = formules_forward[[i]], data = data_pcs, family = "binomial")
+   prob_pred = predict(glm, type = "response", newdata = data_pcs %>% select(-label))
+   y_pred = ifelse(prob_pred > 0.5, 3, 1) %>% 
+      as.factor()
+   confusion_matrix <- confusionMatrix(y_pred, data_pcs$label)
+   tikslumai_forward[[i]] <- classAcc(confusion_matrix)
+}
+
+
+tikslumai_forward_data <- do.call(rbind.data.frame, tikslumai_forward) %>% 
+   bind_cols(kiek_pca = 1:length(formules_forward))
+colnames(tikslumai_forward_data) <- c("skaitmuo_1", "skaitmuo_3", "bendras", "kiek_pca")
+
+
+tikslumai_forward_data %>% 
+   tidyr::pivot_longer(c(-kiek_pca), names_to = "Kieno Tikslumas", values_to = "Tikslumas") %>% 
+   ggplot(aes(x = kiek_pca, y = Tikslumas, color = `Kieno Tikslumas`)) +
+   geom_line() +
+   theme_minimal() +
+   xlab("Pagrindinių Komponenčių Kiekis") +
+   ylab("Tikslumas (%)")
+```
+
+# Uzd. 8
+```{r}
+forward_glm$anova$Step
+```
+
+# Uzd. 9
+```{r}
+atsitiktines_originalios_poros <- sample(names(uzpildyti_pixeliai), 20, replace = F)
+
+formules_originalios <- NULL
+formules_originalios[[1]] <- paste0("label ~ ", atsitiktines_originalios_poros[1])
+for(i in 2:length(atsitiktines_originalios_poros)){
+   formules_originalios[[i]] <- paste0(formules_originalios[[i-1]], "+", atsitiktines_originalios_poros[i])
+}
+
+formules_originalios <- lapply(formules_originalios, as.formula)
+
+tikslumai_originalios <- NULL
+for(i in 1:length(formules_originalios)){
+   glm <- glm(formula = formules_originalios[[i]], data = data, family = "binomial")
+   prob_pred = predict(glm, type = "response", newdata = data %>% select(-label))
+   y_pred = ifelse(prob_pred > 0.5, 3, 1) %>% 
+      as.factor()
+   confusion_matrix <- confusionMatrix(y_pred, data$label)
+   tikslumai_originalios[[i]] <- classAcc(confusion_matrix)
+}
+
+
+tikslumai_originalios_data <- do.call(rbind.data.frame, tikslumai_originalios) %>% 
+   bind_cols(kiek_pozymiu = 1:length(formules_originalios))
+colnames(tikslumai_originalios_data) <- c("skaitmuo_1", "skaitmuo_3", "bendras", "kiek_pozymiu")
+
+
+tikslumai_originalios_data %>% 
+   tidyr::pivot_longer(c(-kiek_pozymiu), names_to = "Kieno Tikslumas", values_to = "Tikslumas") %>% 
+   ggplot(aes(x = kiek_pozymiu, y = Tikslumas, color = `Kieno Tikslumas`)) +
+   geom_line() +
+   theme_minimal() +
+   xlab("Atsitiktinių Požymių Kiekis") +
+   ylab("Tikslumas (%)")
+```
+
+# Uzd. 10
+```{r}
+glm <- glm(label ~ ., data = data %>% select(all_of(atsitiktines_originalios_poros), label), family = "binomial")
+glm_tuscias <- glm(label ~ 1, data = data, family = "binomial")
+# Forward
+originalios_forward_glm <- step(glm_tuscias, direction = "forward", scope = formula(glm), trace=0)
+summary(originalios_forward_glm)
+
+originalios_forward_glm$anova
+
+formules_originalios_forward <- NULL
+formules_originalios_forward[[1]] <- paste0("label ~ ", originalios_forward_glm$anova[2,1])
+for(i in 3:nrow(originalios_forward_glm$anova)){
+   formules_originalios_forward[[i-1]] <- paste0(formules_originalios_forward[[i-2]], originalios_forward_glm$anova[i,1])
+}
+
+formules_originalios_forward <- lapply(formules_originalios_forward, as.formula)
+
+
+tikslumai_originalios_forward <- NULL
+for(i in 1:length(formules_originalios_forward)){
+   glm <- glm(formula = formules_originalios_forward[[i]], data = data, family = "binomial")
+   prob_pred = predict(glm, type = "response", newdata = data %>% select(-label))
+   y_pred = ifelse(prob_pred > 0.5, 3, 1) %>% 
+      as.factor()
+   confusion_matrix <- confusionMatrix(y_pred, data$label)
+   tikslumai_originalios_forward[[i]] <- classAcc(confusion_matrix)
+}
+
+
+tikslumai_originalios_forward_data <- do.call(rbind.data.frame, tikslumai_originalios_forward) %>% 
+   bind_cols(kiek_pozymiu = 1:length(formules_originalios_forward))
+colnames(tikslumai_originalios_forward_data) <- c("skaitmuo_1", "skaitmuo_3", "bendras", "kiek_pozymiu")
+
+
+tikslumai_originalios_forward_data %>% 
+   tidyr::pivot_longer(c(-kiek_pozymiu), names_to = "Kieno Tikslumas", values_to = "Tikslumas") %>% 
+   ggplot(aes(x = kiek_pozymiu, y = Tikslumas, color = `Kieno Tikslumas`)) +
+   geom_line() +
+   theme_minimal() +
+   xlab("Atsitiktinių Požymių Kiekis") +
+   ylab("Tikslumas (%)")
+```
+
+# Uzd. 11
+```{r}
+tikslumai_data
+tikslumai_forward_data
+tikslumai_originalios_data
+tikslumai_originalios_forward_data
+
+
+tikslumai_visi <- data.frame(
+   Bendras_Tikslumas = c(tikslumai_data$bendras, tikslumai_forward_data$bendras, tikslumai_originalios_data$bendras, tikslumai_originalios_forward_data$bendras),
+   Kiek_Pozymiu = c(tikslumai_data$kiek_pca, tikslumai_forward_data$kiek_pca, tikslumai_originalios_data$kiek_pozymiu, tikslumai_originalios_forward_data$kiek_pozymiu),
+   Atvejis = c(rep("PCA su atsitiktinėm PC", nrow(tikslumai_data)), rep("PCA su forward metodu", nrow(tikslumai_forward_data)), rep("Atsitiktiniai požymiai", nrow(tikslumai_originalios_data)), rep("Atsitiktiniai požymiai forward metodu", nrow(tikslumai_originalios_forward_data)))
+)
+
+tikslumai_visi %>% 
+   ggplot(aes(x = Kiek_Pozymiu, y = Bendras_Tikslumas, color = Atvejis)) +
+   geom_line() +
+   theme_minimal() +
+   xlab("Požymių Kiekis") +
+   ylab("Bendras Tikslumas (%)")
+```
+
+# Uzd. 12
+```{r}
+lasso_L1 <- glmnet(data %>% select(-label), data$label, family = "binomial", alpha = 1)
+ridge_L2 <- glmnet(data %>% select(-label), data$label, family = "binomial", alpha = 0)
+
+plot(lasso_L1, label=TRUE,xvar="lambda", main="L1")
+plot(ridge_L2,label=TRUE,xvar="lambda", main="L2")
+
+
+
+lasso_L1 <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 1)
+ridge_L2 <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 0)
+plot(lasso_L1, label=TRUE,xvar="lambda", main="L1")
+plot(ridge_L2, label=TRUE,xvar="lambda", main="L2")
 ```
 
