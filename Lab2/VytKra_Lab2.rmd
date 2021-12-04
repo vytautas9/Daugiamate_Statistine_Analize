@@ -161,7 +161,7 @@ atsitiktiniai_data %>%
    xlab(atsitiktiniai_data_colnames[5]) +
    ylab(atsitiktiniai_data_colnames[6])
 
-ggsave(filename = "atsitiktines_sklaidos_2.png", width = 14, height = 7, units = "in", bg = "white")
+ggsave(filename = "atsitiktines_sklaidos_3.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 7
