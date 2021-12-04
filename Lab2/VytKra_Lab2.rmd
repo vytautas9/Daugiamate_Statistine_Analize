@@ -366,9 +366,67 @@ plot(ridge_L2,label=TRUE,xvar="lambda", main="L2")
 
 
 
-lasso_L1 <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 1)
-ridge_L2 <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 0)
-plot(lasso_L1, label=TRUE,xvar="lambda", main="L1")
-plot(ridge_L2, label=TRUE,xvar="lambda", main="L2")
+lasso_L1_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 1)
+ridge_L2_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 0)
+plot(lasso_L1_pca, label=TRUE,xvar="lambda", main="L1")
+plot(ridge_L2_pca, label=TRUE,xvar="lambda", main="L2")
 ```
+
+```{r}
+lambdas <- lasso_L1$lambda
+
+lambda <- NULL
+
+for(i in 1:length(lambdas)){
+   lassoCoef = coef(lasso_L1, s = lambdas[i])
+   nonzero_coef = lassoCoef[lassoCoef[,1] != 0,]
+   if(length(nonzero_coef) - 1 == 10){
+      lambda <- lambdas[i]
+      break
+   }
+}
+
+
+
+lassoCoef <- coef(lasso_L1, s = lambda)
+lassoCoef <- lassoCoef[lassoCoef[,1] != 0,]
+lambda
+lassoCoef
+```
+
+```{r}
+lambdas <- lasso_L1_pca$lambda
+
+lambda_pca <- NULL
+
+for(i in 1:length(lambdas)){
+   lassoCoef = coef(lasso_L1_pca, s = lambdas[i])
+   nonzero_coef = lassoCoef[lassoCoef[,1] != 0,]
+   if(length(nonzero_coef) - 1 == 10){
+      lambda_pca <- lambdas[i]
+      break
+   }
+}
+
+
+
+lassoCoef <- coef(lasso_L1_pca, s = lambda_pca)
+lassoCoef <- lassoCoef[lassoCoef[,1] != 0,]
+lambda_pca
+lassoCoef
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
