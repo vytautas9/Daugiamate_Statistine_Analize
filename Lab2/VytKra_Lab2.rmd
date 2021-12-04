@@ -390,11 +390,11 @@ lasso_L1 <- glmnet(data %>% select(-label), data$label, family = "binomial", alp
 ridge_L2 <- glmnet(data %>% select(-label), data$label, family = "binomial", alpha = 0)
 
 png(file = "lasso_l1.png", width = 1200, height = 850)
-plot(lasso_L1, label=TRUE,xvar="lambda", main="L1")
+plot(lasso_L1, label=TRUE,xvar="lambda", main="Lasso L1")
 dev.off()
 
 png(file = "ridge_l2.png", width = 1200, height = 850)
-plot(ridge_L2,label=TRUE,xvar="lambda", main="L2")
+plot(ridge_L2,label=TRUE,xvar="lambda", main="Ridge L2")
 dev.off()
 
 
@@ -402,11 +402,11 @@ lasso_L1_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "bi
 ridge_L2_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 0)
 
 png(file = "lasso_l1_pca.png", width = 1200, height = 850)
-plot(lasso_L1_pca, label=TRUE,xvar="lambda", main="L1")
+plot(lasso_L1_pca, label=TRUE,xvar="lambda", main="Lasso L1")
 dev.off()
 
 png(file = "ridge_l2_pca.png", width = 1200, height = 850)
-plot(ridge_L2_pca, label=TRUE,xvar="lambda", main="L2")
+plot(ridge_L2_pca, label=TRUE,xvar="lambda", main="Ridge L2")
 dev.off()
 ```
 
