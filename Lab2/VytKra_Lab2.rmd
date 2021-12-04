@@ -39,38 +39,48 @@ spausdinti_grafika <- function(skaicius, kuri_irasa){
 }
 
 # vienetai:
+png(file = "vienetai.png", width = 1200, height = 850)
 par(mfrow=c(2,2))
 spausdinti_grafika(1, 1)
 spausdinti_grafika(1, 2)
 spausdinti_grafika(1, 3)
 spausdinti_grafika(1, 4)
+dev.off()
 
 # trejetai:
+png(file = "trejetai.png", width = 1200, height = 850)
 par(mfrow=c(2,2))
 spausdinti_grafika(3, 1)
 spausdinti_grafika(3, 2)
 spausdinti_grafika(3, 3)
 spausdinti_grafika(3, 4)
+dev.off()
 
 # penketai:
+png(file = "penketai.png", width = 1200, height = 850)
 par(mfrow=c(2,2))
 spausdinti_grafika(5, 1)
 spausdinti_grafika(5, 2)
 spausdinti_grafika(5, 3)
 spausdinti_grafika(5, 4)
+dev.off()
 
 # septynetai:
+png(file = "septynetai.png", width = 1200, height = 850)
 par(mfrow=c(2,2))
 spausdinti_grafika(7, 1)
 spausdinti_grafika(7, 2)
 spausdinti_grafika(7, 3)
 spausdinti_grafika(7, 4)
+dev.off()
 ```
 
 # Uzd. 3
 ```{r}
 pca <- prcomp(data %>% select(-label), scale = FALSE)
 fviz_eig(pca, ncp = 20, main = "Pagrindinių komponenčių (PC1 - PC20) dispersijos (%)", ylab = "Dispersija (%)", xlab = "Pagrindinė Komponentė")
+
+ggsave(filename = "pca_dispersijos.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 4
@@ -99,6 +109,8 @@ fviz_pca_ind(pca,
              label = "none",
              title = "PC1 ir PC2 sklaidos diagrama pagal skaitmenis"
              )
+
+ggsave(filename = "PC_1_2_sklaida.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 6
@@ -133,17 +145,23 @@ atsitiktiniai_data %>%
    xlab(atsitiktiniai_data_colnames[1]) +
    ylab(atsitiktiniai_data_colnames[2])
 
+ggsave(filename = "atsitiktines_sklaidos_1.png", width = 14, height = 7, units = "in", bg = "white")
+
 atsitiktiniai_data %>% 
    ggplot(aes(x = V3, y = V4, color = label)) +
    geom_point() +
    xlab(atsitiktiniai_data_colnames[3]) +
    ylab(atsitiktiniai_data_colnames[4])
 
+ggsave(filename = "atsitiktines_sklaidos_2.png", width = 14, height = 7, units = "in", bg = "white")
+
 atsitiktiniai_data %>% 
    ggplot(aes(x = V5, y = V6, color = label)) +
    geom_point() +
    xlab(atsitiktiniai_data_colnames[5]) +
    ylab(atsitiktiniai_data_colnames[6])
+
+ggsave(filename = "atsitiktines_sklaidos_2.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 7
@@ -205,6 +223,8 @@ tikslumai_data %>%
    xlab("Pagrindinių Komponenčių Kiekis") +
    ylab("Tikslumas (%)")
 
+ggsave(filename = "tikslumas_pca.png", width = 14, height = 7, units = "in", bg = "white")
+
 
 glm <- glm(label ~ ., data = data_pcs[,c(1:20, 785)], family = "binomial")
 glm_tuscias <- glm(label ~ 1, data = data_pcs, family = "binomial")
@@ -246,6 +266,8 @@ tikslumai_forward_data %>%
    theme_minimal() +
    xlab("Pagrindinių Komponenčių Kiekis") +
    ylab("Tikslumas (%)")
+
+ggsave(filename = "tikslumas_pca_forward.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 8
@@ -288,6 +310,8 @@ tikslumai_originalios_data %>%
    theme_minimal() +
    xlab("Atsitiktinių Požymių Kiekis") +
    ylab("Tikslumas (%)")
+
+ggsave(filename = "tikslumas_originalios.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 10
@@ -332,6 +356,8 @@ tikslumai_originalios_forward_data %>%
    theme_minimal() +
    xlab("Atsitiktinių Požymių Kiekis") +
    ylab("Tikslumas (%)")
+
+ggsave(filename = "tikslumas_originalios_forward.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 11
@@ -354,6 +380,8 @@ tikslumai_visi %>%
    theme_minimal() +
    xlab("Požymių Kiekis") +
    ylab("Bendras Tikslumas (%)")
+
+ggsave(filename = "tikslumas_visu.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 # Uzd. 12
@@ -361,15 +389,25 @@ tikslumai_visi %>%
 lasso_L1 <- glmnet(data %>% select(-label), data$label, family = "binomial", alpha = 1)
 ridge_L2 <- glmnet(data %>% select(-label), data$label, family = "binomial", alpha = 0)
 
+png(file = "lasso_l1.png", width = 1200, height = 850)
 plot(lasso_L1, label=TRUE,xvar="lambda", main="L1")
-plot(ridge_L2,label=TRUE,xvar="lambda", main="L2")
+dev.off()
 
+png(file = "ridge_l2.png", width = 1200, height = 850)
+plot(ridge_L2,label=TRUE,xvar="lambda", main="L2")
+dev.off()
 
 
 lasso_L1_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 1)
 ridge_L2_pca <- glmnet(data_pcs %>% select(-label), data_pcs$label, family = "binomial", alpha = 0)
+
+png(file = "lasso_l1_pca.png", width = 1200, height = 850)
 plot(lasso_L1_pca, label=TRUE,xvar="lambda", main="L1")
+dev.off()
+
+png(file = "ridge_l2_pca.png", width = 1200, height = 850)
 plot(ridge_L2_pca, label=TRUE,xvar="lambda", main="L2")
+dev.off()
 ```
 
 ```{r}
