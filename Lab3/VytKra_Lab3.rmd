@@ -102,32 +102,47 @@ R3 <- matrix(
 ```
 
 ```{r}
+library(mvtnorm)
+library(mclust)
+
 n1 <- sum(runif(100) < p1)
 n2 <- sum(runif(100) < p1)
 n3 <- 100 - n1 - n2
 
-gauso_ad_100 <- rbind(mvrnorm(n1, m1, R1), mvrnorm(n2, m2, R2), mvrnorm(n3, m3, R3))
+gauso_ad_100 <- rbind(rmvnorm(n1, m1, R1), rmvnorm(n2, m2, R2), rmvnorm(n3, m3, R3))
 
 n1 <- sum(runif(500) < p1)
 n2 <- sum(runif(500) < p1)
 n3 <- 500 - n1 - n2
 
-gauso_ad_500 <- rbind(mvrnorm(n1, m1, R1), mvrnorm(n2, m2, R2), mvrnorm(n3, m3, R3))
+gauso_ad_500 <- rbind(rmvnorm(n1, m1, R1), rmvnorm(n2, m2, R2), rmvnorm(n3, m3, R3))
 
 n1 <- sum(runif(3000) < p1)
 n2 <- sum(runif(3000) < p1)
 n3 <- 3000 - n1 - n2
 
-gauso_ad_3000 <- rbind(mvrnorm(n1, m1, R1), mvrnorm(n2, m2, R2), mvrnorm(n3, m3, R3))
+gauso_ad_3000 <- rbind(rmvnorm(n1, m1, R1), rmvnorm(n2, m2, R2), rmvnorm(n3, m3, R3))
 ```
 
 
 
 ## 2
 ```{r}
+# Klasterizavimas
+fit <- Mclust(gauso_ad_100)
 
+# Rezultatai
+summary(fit)
+fit$parameters
+
+plot(fit)
 ```
 
+# Uzd. 4
+## 1
+```{r}
+
+```
 
 
 
