@@ -127,31 +127,198 @@ gauso_ad_3000 <- rbind(rmvnorm(n1, m1, R1), rmvnorm(n2, m2, R2), rmvnorm(n3, m3,
 
 
 ## 2
+### N = 100
 ```{r}
 # Klasterizavimas
 fit <- Mclust(gauso_ad_100)
 
 # Rezultatai
-summary(fit)
+fit$BIC
 fit$parameters
-
-plot(fit)
 ```
+
+### N = 500
+```{r}
+# Klasterizavimas
+fit <- Mclust(gauso_ad_500)
+
+# Rezultatai
+fit$BIC
+fit$parameters
+```
+
+### N = 3000
+```{r}
+# Klasterizavimas
+fit <- Mclust(gauso_ad_3000)
+
+# Rezultatai
+fit$BIC
+fit$parameters
+```
+
 
 # Uzd. 4
 ## 1
 ```{r}
+library(dplyr)
+koordinates <- read.xlsx("koordinates.xlsx", rowNames = TRUE) %>% 
+   mutate_all(as.numeric)
 
+knitr::kable(koordinates)
+
+koordinates <- scale(koordinates)
+
+knitr::kable(koordinates)
 ```
 
+## 2
+### 2 klasteriai
+```{r}
+library(ggpubr)
+library(tibble)
+kmeans_2 <- kmeans(koordinates, centers = 2)
+df <- koordinates %>% 
+   as.data.frame() %>% 
+   rownames_to_column("Miestas") %>% 
+   bind_cols(klasteris = factor(kmeans_2$cluster))
 
+ggscatter(
+  df, x = "Pirma_Koord", y = "Antra_Koord", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal(),
+  label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
 
+### 3 klasteriai
+```{r}
+kmeans_3 <- kmeans(koordinates, centers = 3)
+df <- koordinates %>% 
+   as.data.frame() %>% 
+   rownames_to_column("Miestas") %>% 
+   bind_cols(klasteris = factor(kmeans_3$cluster))
 
+ggscatter(
+  df, x = "Pirma_Koord", y = "Antra_Koord", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal(),
+  label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
 
+### 4 klasteriai
+```{r}
+kmeans_4 <- kmeans(koordinates, centers = 4)
+df <- koordinates %>% 
+   as.data.frame() %>% 
+   rownames_to_column("Miestas") %>% 
+   bind_cols(klasteris = factor(kmeans_4$cluster))
 
+ggscatter(
+  df, x = "Pirma_Koord", y = "Antra_Koord", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal(),
+  label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
 
+### 5 klasteriai
+```{r}
+kmeans_5 <- kmeans(koordinates, centers = 5)
+df <- koordinates %>% 
+   as.data.frame() %>% 
+   rownames_to_column("Miestas") %>% 
+   bind_cols(klasteris = factor(kmeans_5$cluster))
 
+ggscatter(
+  df, x = "Pirma_Koord", y = "Antra_Koord", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal(),
+  label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
 
+## 3
+```{r}
+kmeans_2 <- kmeans(gauso_ad_500, centers = 2)
+kmeans_3 <- kmeans(gauso_ad_500, centers = 3)
+kmeans_4 <- kmeans(gauso_ad_500, centers = 4)
+kmeans_5 <- kmeans(gauso_ad_500, centers = 5)
+```
+
+## 4
+### 2 klasteriai
+```{r}
+df <- gauso_ad_500 %>% 
+   as.data.frame() %>% 
+   bind_cols(klasteris = factor(kmeans_2$cluster))
+
+ggscatter(
+  df, x = "V1", y = "V2", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
+
+### 3 klasteriai
+```{r}
+df <- gauso_ad_500 %>% 
+   as.data.frame() %>% 
+   bind_cols(klasteris = factor(kmeans_3$cluster))
+
+ggscatter(
+  df, x = "V1", y = "V2", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
+
+### 4 klasteriai
+```{r}
+df <- gauso_ad_500 %>% 
+   as.data.frame() %>% 
+   bind_cols(klasteris = factor(kmeans_4$cluster))
+
+ggscatter(
+  df, x = "V1", y = "V2", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
+
+### 5 klasteriai
+```{r}
+df <- gauso_ad_500 %>% 
+   as.data.frame() %>% 
+   bind_cols(klasteris = factor(kmeans_5$cluster))
+
+ggscatter(
+  df, x = "V1", y = "V2", 
+  color = "klasteris", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
+) +
+  stat_mean(aes(color = klasteris), size = 4)
+```
+
+## 5
+```{r}
+kvad_sumos <- NULL
+klasteriai <- 1:10
+
+for(i in 1:length(klasteriai)){
+   kvad_sumos[i] <- kmeans(gauso_ad_500, centers = i)$tot.withinss
+}
+
+plot(klasteriai, kvad_sumos, type = "l")
+```
 
 
 
