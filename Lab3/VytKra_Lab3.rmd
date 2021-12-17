@@ -36,10 +36,21 @@ hclust_centroid <- hclust(dist_mat, method = "centroid")
 hclust_single <- hclust(dist_mat, method = "single")
 
 
-plot(hclust_average, main = "Vidutinio atstumo metodas")
-plot(hclust_complete, main = "Tolimiausio kaimyno metodas")
-plot(hclust_centroid, main = "Atstumo tarp centru metodas")
-plot(hclust_single, main = "Artimiausio kaimyno metodas")
+png(file = "1uzd_3_average.png", width = 1200, height = 850)
+plot(hclust_average, main = "Vidutinio atstumo metodas", cex = 2)
+dev.off()
+
+png(file = "1uzd_3_complete.png", width = 1200, height = 850)
+plot(hclust_complete, main = "Tolimiausio kaimyno metodas", cex = 2)
+dev.off()
+
+png(file = "1uzd_3_centroid.png", width = 1200, height = 850)
+plot(hclust_centroid, main = "Atstumo tarp centru metodas", cex = 2)
+dev.off()
+
+png(file = "1uzd_3_single.png", width = 1200, height = 850)
+plot(hclust_single, main = "Artimiausio kaimyno metodas", cex = 2)
+dev.off()
 ```
 
 
@@ -51,8 +62,10 @@ plot(hclust_single, main = "Artimiausio kaimyno metodas")
 fit <- cmdscale(dist_mat)
 fit
 # plot solution
-plot(fit, xlab="Coordinate 1", ylab="Coordinate 2", main="Metric MDS, cmdscale()", type="n")
-text(fit, labels = colnames(atstumai), cex=.7)
+png(file = "2uzd_1_Metric.png", width = 1200, height = 850)
+plot(fit, xlab="Koord. 1", ylab="Koord. 2", main="Metrinis daugiamačių skalių metodas", type="n" , cex = 2)
+text(fit, labels = colnames(atstumai), cex=2)
+dev.off()
 ```
 
 ```{r}
@@ -61,8 +74,10 @@ library(MASS)
 fit <- sammon(dist_mat)
 fit 
 # plot solution
-plot(fit$points, xlab="Coordinate 1", ylab="Coordinate 2", main="Nonmetric MDS, sammon()", type="n")
-text(fit$points, labels = colnames(atstumai), cex=.7) 
+png(file = "2uzd_1_nonmetric.png", width = 1200, height = 850)
+plot(fit$points, xlab="Koord. 1", ylab="Koord. 2", main="Ne metrinis daugiamačių skalių metodas", type="n", cex = 2)
+text(fit$points, labels = colnames(atstumai), cex = 2) 
+dev.off()
 ```
 
 
@@ -190,6 +205,7 @@ ggscatter(
   label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_2_2klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 3 klasteriai
@@ -207,6 +223,7 @@ ggscatter(
   label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_2_3klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 4 klasteriai
@@ -224,6 +241,7 @@ ggscatter(
   label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_2_4klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 5 klasteriai
@@ -241,6 +259,7 @@ ggscatter(
   label = "Miestas", repel = TRUE, label.rectangle = TRUE, font.label = c(14)
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_2_5klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ## 3
@@ -264,6 +283,7 @@ ggscatter(
   shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_4_2klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 3 klasteriai
@@ -278,6 +298,7 @@ ggscatter(
   shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_4_3klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 4 klasteriai
@@ -292,6 +313,7 @@ ggscatter(
   shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_4_4klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ### 5 klasteriai
@@ -306,6 +328,7 @@ ggscatter(
   shape = "klasteris", size = 1.5,  legend = "right", ggtheme = theme_minimal()
 ) +
   stat_mean(aes(color = klasteris), size = 4)
+ggsave(filename = "4uzd_4_5klasteriai.png", width = 14, height = 7, units = "in", bg = "white")
 ```
 
 ## 5
@@ -317,23 +340,17 @@ for(i in 1:length(klasteriai)){
    kvad_sumos[i] <- kmeans(gauso_ad_500, centers = i)$tot.withinss
 }
 
-plot(klasteriai, kvad_sumos, type = "l")
+png(file = "4uzd_5.png", width = 1200, height = 850)
+plot(klasteriai, kvad_sumos, type = "l", cex = 2)
+dev.off()
 ```
 
+## 6
+```{r}
+library(factoextra)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+png(file = "6uzd.png", width = 1200, height = 850)
+fviz_nbclust(gauso_ad_500, kmeans, method = "silhouette")
+dev.off()
+```
 
